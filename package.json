@@ -4,5 +4,5 @@
   "description": "Dfam Karyotype Visualization",
   "keywords": ["karyotype","giesma","dna", "chromosomes", "dfam"],
   "repository": "https://github.com/Dfam-consortium/Karyotype.git",
-  "author": "Robert Hubley <rhubley@gmail.com>",
+  "author": "Robert Hubley <rhubley@gmail.com>"
 }
