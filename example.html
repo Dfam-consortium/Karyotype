@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+  <body>
+    <div id="karyotype">
+    </div>
+    <script src='Karyotype.js'></script>
+    <script>
+        var karyotype_data = {
+            'singleton_contigs': [{
+                    'name': 'chr1',
+                    'size': 283834921,
+                    'hit_clusters': [
+                        [3397261, 4529680, 23],
+                        [4529681, 5662100, 20],
+                        [5662101, 6794520, 80],
+                        [19251142, 20383561, 56],
+                        [45296804, 46429223, 97]
+                    ],
+                    'nrph_hit_clusters': [
+                        [3397261, 4529680, 23],
+                        [19251142, 20383561, 22],
+                        [45296804, 46429223, 2]
+                    ],
+                    'giesma_bands': [
+                        [50200000, 55600000, 3],
+                        [55600000, 58500000, 6],
+                        [99300000, 101800000, 7],
+                        [117200000, 120400000, 9]
+                    ]
+                },
+                {
+                    'name': 'chr2',
+                    'size': 200283321,
+                    'hit_clusters': [
+                        [3397261, 4529680, 23],
+                        [4529681, 5662100, 20],
+                        [5662101, 6794520, 80],
+                        [19251142, 20383561, 56],
+                        [45296804, 46429223, 97]
+                    ],
+                    'nrph_hit_clusters': [
+                        [5662101, 6794520, 80],
+                        [45296804, 46429223, 3]
+                    ]
+                }
+            ],
+            'remaining_genome_contig': undefined,
+        };
+        var myKaryotype = new Karyotype( document.getElementById('karyotype'), 
+                                         karyotype_data );
+    </script>
+    <input id="All_Hits" type="button" value="All Hits" onclick="myKaryotype.switchVisualization('all');" />
+    <input id="NRPH_Hits" type="button" value="NRPH Hits" onclick="myKaryotype.switchVisualization('nrph');" />
+    <input id="Giesma" type="button" value="Giesma" onclick="myKaryotype.switchVisualization('giesma');" />
+  </body>
+</html>
