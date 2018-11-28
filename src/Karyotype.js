@@ -150,7 +150,7 @@
         // Legend Size
         this.legendWidth = 160;
         this.legendHeight = 200;
-        this.legendRangeIncr = null;  // The length of the legend ranges.  Depends
+        this.legendRangeSize = null;  // The size of the legend ranges ( except for the last range ).  Depends
                                       // on the max counts in the dataset.
 
         // How many contig glyphs to display 
@@ -198,12 +198,12 @@
                 }
             }
             // set legend ranges
-            kObj.legendRangeIncr = Math.floor(maxCount / (kObj.legendColors.length - 1));
+            kObj.legendRangeSize = Math.ceil(maxCount / (kObj.legendColors.length - 1));
             var i;
             var rStart = 1;
             for (i = 1; i < kObj.legendColors.length - 1; i++) {
-                kObj.legendColors[i].desc = rStart + "-" + (rStart + kObj.legendRangeIncr);
-                rStart += kObj.legendRangeIncr + 1;
+                kObj.legendColors[i].desc = rStart + "-" + (rStart + kObj.legendRangeSize - 1);
+                rStart += kObj.legendRangeSize;
             }
             kObj.legendColors[kObj.legendColors.length - 1].desc = rStart + "-" + maxCount;
 
@@ -313,7 +313,7 @@
                 hcBlock.setAttribute('y', (kObj.svgHeight - contigPixelHeight) + startY);
                 hcBlock.setAttribute('width', kObj.contigPixelWidth - 2);
                 hcBlock.setAttribute('height', endY - startY);
-                var colorIdx = Math.floor(clusters[j][2] / kObj.legendRangeIncr);
+                var colorIdx = Math.ceil(clusters[j][2] / kObj.legendRangeSize);
                 var color = "white";
                 if (kObj.currentVisualType != "giesma" && colorIdx < kObj.legendColors.length)
                     color = kObj.legendColors[colorIdx].color;
