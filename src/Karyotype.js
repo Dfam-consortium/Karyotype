@@ -339,8 +339,11 @@
             if (kObj.currentVisualType == "nrph")
                 clusters = contig.nrph_hit_clusters;
             for (j = 0; j < clusters.length; j++) {
-                var startY = Math.floor(clusters[j][0] * kObj.pixelsPerBP);
-                var endY = Math.floor(clusters[j][1] * kObj.pixelsPerBP);
+                var start = clusters[j][0];
+                var end = clusters[j][1];
+                var count = clusters[j][2];
+                var startY = Math.floor(start * kObj.pixelsPerBP);
+                var endY = Math.floor(end * kObj.pixelsPerBP);
 
                 // Hit Cluster SVG rectangle
                 var hcBlock = document.createElementNS(svgNS, 'rect');
@@ -348,15 +351,15 @@
                 hcBlock.setAttribute('y', cylinderY1 + startY);
                 hcBlock.setAttribute('width', kObj.contigPixelWidth - 2);
                 hcBlock.setAttribute('height', endY - startY);
-                var colorIdx = Math.ceil(clusters[j][2] / kObj.legendRangeSize);
+                var colorIdx = Math.ceil(count / kObj.legendRangeSize);
                 var color = "white";
                 if (kObj.currentVisualType != "giesma" && colorIdx < kObj.legendColors.length)
                     color = kObj.legendColors[colorIdx].color;
                 hcBlock.setAttribute('fill', color);
                 hcBlock.setAttribute('data-tooltip-text', contig.name + ":" +
-                    clusters[j][0] + "-" +
-                    clusters[j][1] +
-                    " count:" + clusters[j][2]);
+                    start + "-" +
+                    end +
+                    " count:" + count);
 
                 hcBlock.addEventListener('mousemove', function(evt) {
                     var hcBlockEle = evt.target;
@@ -385,14 +388,16 @@
                     kObj.tooltipGroup.setAttribute("style", "opacity: 0;");
                 });
 
-
-                hcBlock.addEventListener('mousedown', function(evt) {
-                    var hcBlockEle = evt.target;
-                    var text = hcBlockEle.getAttributeNS(null, "data-tooltip-text");
-                    console.log(text + " selected");
-                });
-
-
+                (function(contig_name, start, end) {
+                  hcBlock.addEventListener('mousedown', function(evt) {
+                      var event = new CustomEvent("karyotypeclicked", { detail: {
+                        contig: contig_name,
+                        start: start,
+                        end: end,
+                      }, bubbles: true });
+                      hcBlock.dispatchEvent(event);
+                  });
+                })(contig.name, start, end);
 
                 kObj.svg.appendChild(hcBlock);
 
