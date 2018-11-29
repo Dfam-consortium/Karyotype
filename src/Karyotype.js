@@ -76,7 +76,19 @@
 
     function Karyotype(parent_element, karyotype_data) {
         this.karyotype_data = karyotype_data;
-        
+
+        // Glyph Size
+        this.contigPixelWidth = 18;
+        this.contigPixelSeparation = 14;
+        this.contigCapPixelSize = 10;
+        this.contigLabelDefaultSize = 15;
+
+        // Legend Size
+        this.legendWidth = 160;
+        this.legendHeight = 200;
+        this.legendRangeSize = null;  // The size of the legend ranges ( except for the last range ).  Depends
+                                      // on the max counts in the dataset.
+
         // Giesma Karyotype Staining Colors
         this.giesmaColors = ["#527280", "#ffffff", "#c8c88c", "#e6e6e6", "#c8c8c8", "#b4b4b4", "#8c8c8c", "#646464", "#323232", "#ffffff", "#823c5a"];
 
@@ -112,17 +124,20 @@
         ];
  
         // Get stats from datastructure
+        this.contigLabelSize = this.contigLabelDefaultSize;
         this.maxHitClusterSize = 0;
         this.maxNrphHitClusterSize = 0;
         this.hasGiesmaDetails = 0;
+        this.hasInferredLabels = 1;
         var i;
         for (i = 0; i < this.karyotype_data.singleton_contigs.length; i++) {
-            // Log that at least on contig has Giesma band details
-            if (this.karyotype_data.singleton_contigs[i].giesma_bands != null &&
-                this.karyotype_data.singleton_contigs[i].giesma_bands.length > 0)
-                this.hasGiesmaDetails = 1;
             var j;
             var contig = this.karyotype_data.singleton_contigs[i];
+            // Log that at least on contig has Giesma band details
+            if (contig.giesma_bands != null &&
+                contig.giesma_bands.length > 0)
+                this.hasGiesmaDetails = 1;
+            // Get max cluster size for both datasets
             for (j = 0; j < contig.hit_clusters.length; j++) {
                 if (contig.hit_clusters[j][2] > this.maxHitClusterSize)
                     this.maxHitClusterSize = contig.hit_clusters[j][2];
@@ -131,6 +146,21 @@
                 if (contig.nrph_hit_clusters[j][2] > this.maxNrphHitClusterSize)
                     this.maxNrphHitClusterSize = contig.nrph_hit_clusters[j][2];
             }
+            // Determine if we can infer sensible labels from the contig names
+            var sensibleLabel = contig.name;
+            if ( sensibleLabel != null )
+              if ( contig.name.toLowerCase().startsWith("chromosome") )
+                  sensibleLabel = sensibleLabel.replace(/^chromosome/i, '');
+              else if ( contig.name.toLowerCase().startsWith("chr") )
+                  sensibleLabel = sensibleLabel.replace(/^chr/i, '');
+              if ( sensibleLabel.length > 3 )
+              {
+                  sensibleLabel = null;
+                  this.hasInferredLabels = 0;
+                  this.contigLabelSize = 0;
+              }else {
+                contig.sensibleLabel = sensibleLabel;
+              }
         }
 
         // TODO: Assume nothing.  Sort first.
@@ -142,16 +172,6 @@
         this.tooltipPath = null;
         this.tooltipText = null;
 
-        // Glyph Size
-        this.contigPixelWidth = 18;
-        this.contigPixelSeparation = 14;
-        this.contigCapPixelSize = 10;
-
-        // Legend Size
-        this.legendWidth = 160;
-        this.legendHeight = 200;
-        this.legendRangeSize = null;  // The size of the legend ranges ( except for the last range ).  Depends
-                                      // on the max counts in the dataset.
 
         // How many contig glyphs to display 
         //   -- currently setup for showing the genome remaining which
@@ -164,14 +184,13 @@
         this.svgHeight = 300;
         this.svgWidth = Math.floor((this.contigPixelWidth + this.contigPixelWidth) *
             numBars + this.legendWidth);
-        this.pixelsPerBP = (this.svgHeight - (2 * this.contigCapPixelSize)) / this.largestContigBP;
 
         this.currentVisualType = null;
         this.switchVisualization("all");
     }
 
 
-    // Switch between visulizations
+    // Switch between visualizations
     Karyotype.prototype.switchVisualization = function(type) {
         var kObj = this;
         if (type != kObj.currentVisualType) {
@@ -207,6 +226,8 @@
             }
             kObj.legendColors[kObj.legendColors.length - 1].desc = rStart + "-" + maxCount;
 
+            kObj.pixelsPerBP = (this.svgHeight - (2 * this.contigCapPixelSize) - 
+                                   this.contigLabelSize) / this.largestContigBP;
             kObj.visualizeKaryotype();
         }
     }
@@ -262,8 +283,8 @@
             var contigPixelHeight = Math.floor(contig.size * kObj.pixelsPerBP);
 
 
-            var cylinderY1 = kObj.svgHeight - kObj.contigCapPixelSize - contigPixelHeight;
-            var cylinderY2 = kObj.svgHeight - kObj.contigCapPixelSize;
+            var cylinderY1 = kObj.svgHeight - kObj.contigLabelSize - kObj.contigCapPixelSize - contigPixelHeight;
+            var cylinderY2 = kObj.svgHeight - kObj.contigLabelSize - kObj.contigCapPixelSize;
 
             var lLine = document.createElementNS(svgNS, 'line');
             lLine.setAttribute('x1', startX);
@@ -298,6 +319,20 @@
             botCap.setAttribute('style', "fill: white; stroke: #95B3D7;");
             kObj.svg.appendChild(botCap);
 
+            // Draw sensible labels if they were all inferred adequately
+            if ( kObj.hasInferredLabels )
+            {
+              var contigLabel = document.createElementNS(svgNS, 'text');
+              contigLabel.appendChild(document.createTextNode(contig.sensibleLabel));
+              //contigLabel.setAttribute('x', startX + Math.floor(( kObj.contigPixelWidth - textLen ) / 2));
+              contigLabel.setAttribute('x', startX + Math.floor(kObj.contigPixelWidth / 2) );
+              contigLabel.setAttribute('y', kObj.svgHeight - 10 );
+              contigLabel.setAttribute('dominant-baseline', 'middle' );
+              contigLabel.setAttribute('text-anchor', 'middle' );
+              contigLabel.setAttribute('style', 'font-size: 10px;' );
+              kObj.svg.appendChild(contigLabel);
+            }
+
             // Draw hit clusters
             var j = 0;
             var clusters = contig.hit_clusters;
@@ -327,12 +362,12 @@
                     var hcBlockEle = evt.target;
                     var CTM = kObj.svg.getScreenCTM();
                     var text = hcBlockEle.getAttributeNS(null, "data-tooltip-text");
-                    var textLen = kObj.tooltipText.getComputedTextLength();
                     var x = (evt.clientX - CTM.e - 8) / CTM.a;
                     var y = (evt.clientY - CTM.f - 34) / CTM.d;
                     var textEle = kObj.tooltipGroup.getElementsByTagName('text')[0];
                     textEle.firstChild.data = text;
                     kObj.tooltipGroup.setAttributeNS(null, "transform", "translate(" + x + " " + y + ")");
+                    var textLen = kObj.tooltipText.getComputedTextLength();
                     var R = 5;
                     var H = 25;
                     var W = textLen + 20;
