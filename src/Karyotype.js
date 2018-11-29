@@ -310,7 +310,7 @@
                 // Hit Cluster SVG rectangle
                 var hcBlock = document.createElementNS(svgNS, 'rect');
                 hcBlock.setAttribute('x', startX + 1);
-                hcBlock.setAttribute('y', (kObj.svgHeight - contigPixelHeight) + startY);
+                hcBlock.setAttribute('y', cylinderY1 + startY);
                 hcBlock.setAttribute('width', kObj.contigPixelWidth - 2);
                 hcBlock.setAttribute('height', endY - startY);
                 var colorIdx = Math.ceil(clusters[j][2] / kObj.legendRangeSize);
