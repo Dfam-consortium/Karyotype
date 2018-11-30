@@ -386,6 +386,7 @@
 
                 hcBlock.addEventListener('mouseout', function() {
                     kObj.tooltipGroup.setAttribute("style", "opacity: 0;");
+                    kObj.tooltipGroup.setAttributeNS(null, "transform", "translate(-100 -100)");
                 });
 
                 (function(contig_name, start, end) {
