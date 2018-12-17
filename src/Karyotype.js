@@ -504,7 +504,7 @@
         text.setAttribute('y', 18);
         var textstr = document.createTextNode("");
         text.appendChild(textstr);
-        kObj.tooltipGroup.append(text);
+        kObj.tooltipGroup.appendChild(text);
         kObj.svg.appendChild(kObj.tooltipGroup);
 
         kObj.container.appendChild(kObj.svg);
@@ -519,7 +519,7 @@
         // Register as a named AMD module.
         if (typeof define === 'function' && define.amd) {
             define('karyotype', [], function() {
-                return DfamSeedAlignment;
+                return Karyotype;
             });
         }
     }
