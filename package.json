@@ -1,6 +1,6 @@
 {
   "name": "Karyotype",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Dfam Karyotype Visualization",
   "keywords": ["karyotype","giesma","dna", "chromosomes", "dfam"],
   "repository": "https://github.com/Dfam-consortium/Karyotype.git",
